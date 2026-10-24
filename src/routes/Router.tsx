@@ -2,6 +2,7 @@
 // @ts-ignore
 import { lazy } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router';
+import ProtectedRoute from '../features/auth/ProtectedRoute';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 
 /* ***Layouts**** */
@@ -18,6 +19,14 @@ const Maintainance = Loadable(lazy(() => import('../views/authentication/Maintai
 
 // Dashboards
 const Modern = Loadable(lazy(() => import('../views/dashboards/Modern')));
+
+// Accounting
+const Vendors = Loadable(lazy(() => import('../views/vendors/Vendors')));
+const Customers = Loadable(lazy(() => import('../views/customers/Customers')));
+const Invoices = Loadable(lazy(() => import('../views/invoices/Invoices')));
+const Accounts = Loadable(lazy(() => import('../views/accounts/Accounts')));
+const Expenses = Loadable(lazy(() => import('../views/expenses/Expenses')));
+const Documents = Loadable(lazy(() => import('../views/documents/Documents')));
 
 //pages
 const UserProfile = Loadable(lazy(() => import('../views/pages/user-profile/UserProfile')));
@@ -41,11 +50,22 @@ const SolarIcon = Loadable(lazy(() => import('../views/icons/SolarIcon')));
 const Router = [
   {
     path: '/',
-    element: <FullLayout />,
+    element: (
+      <ProtectedRoute>
+        <FullLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: '/', exact: true, element: <Modern /> },
       // { path: '/', exact: true, element: <SamplePage /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
+
+      { path: '/vendors', element: <Vendors /> },
+      { path: '/customers', element: <Customers /> },
+      { path: '/invoices', element: <Invoices /> },
+      { path: '/accounts', element: <Accounts /> },
+      { path: '/expenses', element: <Expenses /> },
+      { path: '/documents', element: <Documents /> },
 
       { path: '/apps/notes', element: <Notes /> },
       { path: '/utilities/form', element: <Form /> },

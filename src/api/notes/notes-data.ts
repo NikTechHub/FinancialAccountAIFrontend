@@ -1,6 +1,6 @@
 import { notesType } from 'src/types/apps/notes';
 
-export let NotesData: notesType[] = [
+export const NotesData: notesType[] = [
   {
     id: 1,
     color: 'primary',

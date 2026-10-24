@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import React, { useContext } from 'react';
 import CardBox from '../../components/shared/CardBox';
 
 

@@ -47,6 +47,54 @@ const SidebarContent: MenuItem[] = [
   },
 
   {
+    heading: 'Accounting',
+    children: [
+      {
+        id: uniqueId(),
+        name: 'Vendors',
+        icon: 'solar:shop-2-linear',
+        url: '/vendors',
+        isPro: false,
+      },
+      {
+        id: uniqueId(),
+        name: 'Customers',
+        icon: 'solar:users-group-rounded-linear',
+        url: '/customers',
+        isPro: false,
+      },
+      {
+        id: uniqueId(),
+        name: 'Invoices',
+        icon: 'solar:bill-list-linear',
+        url: '/invoices',
+        isPro: false,
+      },
+      {
+        id: uniqueId(),
+        name: 'Chart of Accounts',
+        icon: 'solar:notebook-linear',
+        url: '/accounts',
+        isPro: false,
+      },
+      {
+        id: uniqueId(),
+        name: 'Expenses',
+        icon: 'solar:wallet-money-linear',
+        url: '/expenses',
+        isPro: false,
+      },
+      {
+        id: uniqueId(),
+        name: 'Documents',
+        icon: 'solar:document-text-linear',
+        url: '/documents',
+        isPro: false,
+      },
+    ],
+  },
+
+  {
     heading: 'pages',
     children: [
       {

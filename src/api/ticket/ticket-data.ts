@@ -8,7 +8,7 @@ import { TicketType } from 'src/types/ticket';
 
 const chance = new Chance();
 
-export let TicketData: TicketType[] = [
+export const TicketData: TicketType[] = [
   {
     Id: 1,
     ticketTitle: 'Sed ut perspiciatis unde omnis iste',

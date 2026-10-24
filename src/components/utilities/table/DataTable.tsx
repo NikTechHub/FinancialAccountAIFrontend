@@ -294,7 +294,7 @@ export const DataTable = <T extends Record<string, unknown>>({
       id: 'action',
       header: 'Action',
       enableSorting: false,
-      cell: ({}) => {
+      cell: () => {
         return (
           <div className="flex items-center gap-2">
             <Button size={'sm'} variant={'lightprimary'} className="size-8! rounded-full">

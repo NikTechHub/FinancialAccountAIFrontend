@@ -12,34 +12,37 @@ interface SearchResult {
   icon?: string
 }
 
+function searchItems(
+  items: (MenuItem | ChildItem)[],
+  q: string,
+  parentPath = '',
+): SearchResult[] {
+  let results: SearchResult[] = [];
+
+  items.forEach((item) => {
+    const currentPath = parentPath ? `${parentPath} → ${item.name}` : item.name;
+
+    // If match found
+    if (item.name?.toLowerCase().includes(q.toLowerCase()) && item.url) {
+      results.push({
+        name: item.name,
+        url: item.url,
+        path: currentPath,
+        icon: item.icon,
+      });
+    }
+
+    // Search deeper children
+    if (item.children) {
+      results = [...results, ...searchItems(item.children, q, currentPath)];
+    }
+  });
+
+  return results;
+}
+
 function Search() {
   const [query, setQuery] = useState('');
-
-  // 🔍 Recursive search through menu
-  const searchItems = (items: (MenuItem | ChildItem)[], q: string, parentPath = ''): SearchResult[] => {
-    let results: SearchResult[] = [];
-
-    items.forEach((item) => {
-      const currentPath = parentPath ? `${parentPath} → ${item.name}` : item.name;
-
-      // If match found
-      if (item.name?.toLowerCase().includes(q.toLowerCase()) && item.url) {
-        results.push({
-          name: item.name,
-          url: item.url,
-          path: currentPath,
-          icon: item.icon,
-        });
-      }
-
-      // Search deeper children
-      if (item.children) {
-        results = [...results, ...searchItems(item.children, q, currentPath)];
-      }
-    });
-
-    return results;
-  };
 
   // Memoize filtered results
   const results = useMemo(() => {
@@ -67,11 +70,11 @@ function Search() {
       </div>
       <div
         className={`absolute w-full bg-background rounded-md top-11 z-10 start-0 shadow-md border border-border ${
-          Boolean(query) ? 'block' : 'hidden'
+          query ? 'block' : 'hidden'
         }`}
       >
         <SimpleBar className="h-72 p-4 custom-scroll">
-          {Boolean(results.length) ? (
+          {results.length ? (
             results.map((item, i) => (
               <Link
                 key={i}

@@ -1,138 +1,114 @@
+import CardBox from '../../shared/CardBox';
+import iconConnect from 'src/assets/images/svgs/icon-connect.svg';
+import iconBriefcase from 'src/assets/images/svgs/icon-briefcase.svg';
+import iconFavorites from 'src/assets/images/svgs/icon-favorites.svg';
+import iconInvoice from 'src/assets/images/svgs/icon-dd-invoice.svg';
+import iconInbox from 'src/assets/images/svgs/icon-inbox.svg';
+import iconUser from 'src/assets/images/svgs/icon-user-male.svg';
+import iconAccount from 'src/assets/images/svgs/icon-account.svg';
+import type { DashboardResponse } from 'src/features/dashboard/types';
+import {
+  formatCount,
+  formatCurrency,
+  formatCurrencyCompact,
+  pluralize,
+} from 'src/features/dashboard/formatters';
 
+interface TopCardsProps {
+  dashboard: DashboardResponse;
+  currency: string;
+}
 
-import CardBox from "../../shared/CardBox"
-import iconConnect from "src/assets/images/svgs/icon-connect.svg"
-import iconSpeechBubble from "src/assets/images/svgs/icon-speech-bubble.svg"
-import iconFavorites from "src/assets/images/svgs/icon-favorites.svg"
-import iconMailbox from "src/assets/images/svgs/icon-mailbox.svg"
-import iconBriefcase from "src/assets/images/svgs/icon-briefcase.svg"
-import iconUser from "src/assets/images/svgs/icon-user-male.svg"
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from "swiper/modules";
-
-import 'swiper/css';
-import { Link } from "react-router"
-
-const TopCards = () => {
-
+export const TopCards = ({ dashboard, currency }: TopCardsProps) => {
   const TopCardInfo = [
     {
-      key: "card1",
-      title: "Notes",
-      desc: "4+",
+      key: 'revenue',
+      title: 'Revenue',
+      desc: formatCurrencyCompact(dashboard.totalRevenue, currency),
+      titleText: formatCurrency(dashboard.totalRevenue, currency),
       img: iconConnect,
-      bgcolor: "bg-info/10 dark:bg-info/10",
-      textclr: "text-info dark:text-info",
-      url: "/apps/notes"
+      bgcolor: 'bg-info/10 dark:bg-info/10',
+      textclr: 'text-info dark:text-info',
     },
     {
-      key: "card2",
-      title: "Icons",
-      desc: "+1K",
-      img: iconSpeechBubble,
-      bgcolor: "bg-success/10 dark:bg-success/10",
-      textclr: "text-success dark:text-success",
-      url: "/icons/iconify"
-    },
-    {
-      key: "card3",
-      title: "Blogs",
-      desc: "10+",
-      img: iconFavorites,
-      bgcolor: "bg-error/10 dark:bg-error/10",
-      textclr: "text-error dark:text-error",
-      url: "/apps/blog/post"
-    },
-    {
-      key: "card4",
-      title: "Tickets",
-      desc: "8+",
-      img: iconMailbox,
-      bgcolor: "bg-secondary/10 dark:bg-secondary/10",
-      textclr: "text-primary dark:text-primary",
-      url: "/apps/tickets"
-    },
-    {
-      key: "card5",
-      title: "Products",
-      desc: "$96k",
+      key: 'expenses',
+      title: 'Expenses',
+      desc: formatCurrencyCompact(dashboard.totalExpenses, currency),
+      titleText: formatCurrency(dashboard.totalExpenses, currency),
       img: iconBriefcase,
-      bgcolor: "bg-warning/10 dark:bg-warning/10",
-      textclr: "text-warning dark:text-warning",
-      url: "#product"
-
+      bgcolor: 'bg-success/10 dark:bg-success/10',
+      textclr: 'text-success dark:text-success',
     },
     {
-      key: "card7",
-      title: "Employees",
-      desc: "96",
-      img: iconUser,
-      bgcolor: "bg-primary/10 dark:bg-lightprimary",
-      textclr: "text-primary dark:text-primary",
-      url: "/utilities/table"
-    },
-    {
-      key: "card8",
-      title: "Blogs",
-      desc: "696",
+      key: 'netProfit',
+      title: 'Net profit',
+      desc: formatCurrencyCompact(dashboard.netProfit, currency),
+      titleText: formatCurrency(dashboard.netProfit, currency),
       img: iconFavorites,
-      bgcolor: "bg-lighterror dark:bg-lighterror",
-      textclr: "text-error dark:text-error",
-      url: "/apps/blog/post"
+      bgcolor: dashboard.netProfit >= 0 ? 'bg-lightsuccess dark:bg-lightsuccess' : 'bg-lighterror dark:bg-lighterror',
+      textclr: dashboard.netProfit >= 0 ? 'text-success dark:text-success' : 'text-error dark:text-error',
     },
-  ]
-
+    {
+      key: 'invoiced',
+      title: 'Invoiced',
+      desc: formatCurrencyCompact(dashboard.totalInvoiced, currency),
+      titleText: formatCurrency(dashboard.totalInvoiced, currency),
+      img: iconInvoice,
+      bgcolor: 'bg-lightprimary dark:bg-lightprimary',
+      textclr: 'text-primary dark:text-primary',
+    },
+    {
+      key: 'outstanding',
+      title: 'Outstanding',
+      desc: formatCurrencyCompact(dashboard.totalOutstanding, currency),
+      titleText: formatCurrency(dashboard.totalOutstanding, currency),
+      img: iconInbox,
+      bgcolor: 'bg-warning/10 dark:bg-warning/10',
+      textclr: 'text-warning dark:text-warning',
+    },
+    {
+      key: 'customers',
+      title: 'Customers',
+      desc: formatCount(dashboard.customerCount),
+      titleText: `${formatCount(dashboard.customerCount)} active ${pluralize(dashboard.customerCount, 'customer')}`,
+      img: iconUser,
+      bgcolor: 'bg-primary/10 dark:bg-lightprimary',
+      textclr: 'text-primary dark:text-primary',
+    },
+    {
+      key: 'vendors',
+      title: 'Vendors',
+      desc: formatCount(dashboard.vendorCount),
+      titleText: `${formatCount(dashboard.vendorCount)} active ${pluralize(dashboard.vendorCount, 'vendor')}`,
+      img: iconAccount,
+      bgcolor: 'bg-lighterror dark:bg-lighterror',
+      textclr: 'text-error dark:text-error',
+    },
+  ];
 
   return (
-    <>
-      <div>
-        <Swiper
-          slidesPerView={6}
-          spaceBetween={24}
-          loop={true}
-          freeMode={true}
-          grabCursor={true}
-          speed={5000}
-          autoplay={{
-            delay: 0,
-            disableOnInteraction: false,
-          }}
-          modules={[Autoplay]}
-          breakpoints={{
-            0: { slidesPerView: 1, spaceBetween: 10 },
-            640: { slidesPerView: 2, spaceBetween: 14 },
-            768: { slidesPerView: 3, spaceBetween: 18 },
-            1030: { slidesPerView: 4, spaceBetween: 18 },
-            1200: { slidesPerView: 6, spaceBetween: 24 },
-          }}
-          className="mySwiper"
-        >
-          {
-            TopCardInfo.map((item) => {
-              return (
-                <SwiperSlide key={item.key} >
-                  <Link to={item.url} >
-                    <CardBox className={`shadow-none ${item.bgcolor} w-full border-none`}>
-                      <div className="text-center hover:scale-105 transition-all ease-in-out">
-                        <div className="flex justify-center">
-                          <img src={item.img}
-                            width="50" height="50" className="mb-3" alt="profile-image" />
-                        </div>
-                        <p className={`font-semibold ${item.textclr} mb-1`}>
-                          {item.title}
-                        </p>
-                        <h5 className={`text-lg font-semibold ${item.textclr} mb-0`}>{item.desc}</h5>
-                      </div>
-                    </CardBox>
-                  </Link>
-                </SwiperSlide>
-              )
-            })
-          }
-
-        </Swiper>
-      </div>
-    </>
-  )
-}
-export { TopCards }
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+      {TopCardInfo.map((item) => {
+        return (
+          <div
+            key={item.key}
+            role="group"
+            aria-label={`${item.title}: ${item.titleText}`}
+            title={item.titleText}
+            className="h-full"
+          >
+            <CardBox className={`shadow-none ${item.bgcolor} w-full border-none p-4`}>
+              <div className="text-center hover:scale-105 transition-all ease-in-out">
+                <div className="flex justify-center">
+                  <img src={item.img} width="50" height="50" className="mb-3" alt="" />
+                </div>
+                <p className={`text-sm font-semibold ${item.textclr} mb-1`}>{item.title}</p>
+                <h5 className={`text-lg font-semibold ${item.textclr} mb-0`}>{item.desc}</h5>
+              </div>
+            </CardBox>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
