@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { Link } from 'react-router';
 import { Ban, Pencil, Send } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from 'src/components/ui/alert';
 import { Badge } from 'src/components/ui/badge';
@@ -188,9 +189,17 @@ export function InvoiceDetailDialog({
               </DetailItem>
               <DetailItem label="Journal entry">
                 {record.journalEntryId ? (
-                  <span className="break-all font-mono text-xs">
-                    {record.journalEntryId}
-                  </span>
+                  <div className="space-y-1">
+                    <Link
+                      to={`/journal-entries?entryId=${record.journalEntryId}`}
+                      className="font-medium text-primary underline underline-offset-2"
+                    >
+                      View journal entry
+                    </Link>
+                    <p className="break-all font-mono text-xs text-muted-foreground">
+                      {record.journalEntryId}
+                    </p>
+                  </div>
                 ) : (
                   'Not posted'
                 )}

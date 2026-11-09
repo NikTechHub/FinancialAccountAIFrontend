@@ -26,7 +26,15 @@ const Customers = Loadable(lazy(() => import('../views/customers/Customers')));
 const Invoices = Loadable(lazy(() => import('../views/invoices/Invoices')));
 const Accounts = Loadable(lazy(() => import('../views/accounts/Accounts')));
 const Expenses = Loadable(lazy(() => import('../views/expenses/Expenses')));
+const Journals = Loadable(lazy(() => import('../views/journals/Journals')));
+const GeneralLedger = Loadable(lazy(() => import('../views/reports/GeneralLedger')));
+const TrialBalance = Loadable(lazy(() => import('../views/reports/TrialBalance')));
+const ProfitAndLoss = Loadable(lazy(() => import('../views/reports/ProfitAndLoss')));
+const BalanceSheet = Loadable(lazy(() => import('../views/reports/BalanceSheet')));
 const Documents = Loadable(lazy(() => import('../views/documents/Documents')));
+const AccountingAssistant = Loadable(lazy(() => import('../views/assistant/AccountingAssistant')));
+const OrganizationSettings = Loadable(lazy(() => import('../views/organization/OrganizationSettings')));
+const AuditLogs = Loadable(lazy(() => import('../views/audit/AuditLogs')));
 
 //pages
 const UserProfile = Loadable(lazy(() => import('../views/pages/user-profile/UserProfile')));
@@ -65,7 +73,15 @@ const Router = [
       { path: '/invoices', element: <Invoices /> },
       { path: '/accounts', element: <Accounts /> },
       { path: '/expenses', element: <Expenses /> },
+      { path: '/journal-entries', element: <Journals /> },
+      { path: '/reports/general-ledger', element: <GeneralLedger /> },
+      { path: '/reports/trial-balance', element: <TrialBalance /> },
+      { path: '/reports/profit-and-loss', element: <ProfitAndLoss /> },
+      { path: '/reports/balance-sheet', element: <BalanceSheet /> },
       { path: '/documents', element: <Documents /> },
+      { path: '/ai-assistant', element: <AccountingAssistant /> },
+      { path: '/organization-settings', element: <OrganizationSettings /> },
+      { path: '/audit-logs', element: <AuditLogs /> },
 
       { path: '/apps/notes', element: <Notes /> },
       { path: '/utilities/form', element: <Form /> },

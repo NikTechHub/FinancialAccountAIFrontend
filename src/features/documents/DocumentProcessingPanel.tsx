@@ -17,9 +17,11 @@ interface DocumentProcessingPanelProps {
   canWrite: boolean;
   ocrQueued: boolean;
   extractionQueued: boolean;
+  pollingPaused: boolean;
   action: string | null;
   onStartOcr: () => Promise<boolean>;
   onStartExtraction: () => Promise<boolean>;
+  onRefresh: () => void;
 }
 
 const statusLabels: Record<ProcessingStatus, string> = {
@@ -53,9 +55,11 @@ export function DocumentProcessingPanel({
   canWrite,
   ocrQueued,
   extractionQueued,
+  pollingPaused,
   action,
   onStartOcr,
   onStartExtraction,
+  onRefresh,
 }: DocumentProcessingPanelProps) {
   const busy = action !== null;
   const ocrStatus =
@@ -81,6 +85,15 @@ export function DocumentProcessingPanel({
         Processing runs asynchronously on the server. This page checks for updates
         automatically while work is active.
       </p>
+      {pollingPaused && (
+        <Alert variant="lightwarning">
+          <AlertTitle>Processing status has not changed</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+            <span>The worker has not reported a completed or failed state after several minutes. Refresh the saved status; if it remains pending, ask an administrator to check Kafka and the processing worker before retrying.</span>
+            <Button type="button" variant="outline" size="sm" onClick={onRefresh}>Refresh status</Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <section className="rounded-lg border border-border p-4 dark:border-white/10">
         <div className="flex flex-wrap items-start justify-between gap-3">

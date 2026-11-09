@@ -157,4 +157,26 @@ describe('useDocumentProcessing', () => {
 
     expect(getOcrCalls()).toBe(1);
   });
+
+  it('bounds polling and exposes a manual status refresh when the backend stays pending', async () => {
+    let documentCalls = 0;
+    let ocrCalls = 0;
+    const fetchMock = createFetchMock([
+      { path: `/api/v1/documents/${documentId}`, handler: () => { documentCalls++; return jsonResponse(makeDocument('PROCESSING')); } },
+      { path: `/api/v1/documents/${documentId}/ocr`, handler: () => { ocrCalls++; return jsonResponse(makeOcr('PENDING')); } },
+    ]);
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useDocumentProcessing({ documentId, open: true }));
+    await flush();
+    expect(result.current.pollingPaused).toBe(false);
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(200_000); });
+    await flush();
+    expect(result.current.pollingPaused).toBe(true);
+    expect(ocrCalls).toBe(25);
+    const calls = fetchMock.mock.calls.length;
+    await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
+    expect(fetchMock).toHaveBeenCalledTimes(calls);
+    expect(documentCalls).toBe(25);
+  });
 });

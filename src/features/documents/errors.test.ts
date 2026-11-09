@@ -27,5 +27,10 @@ describe('document error messages', () => {
     expect(getDocumentErrorMessage(apiError(503), 'ocr')).toMatch(
       /temporarily unavailable/,
     );
+    expect(getDocumentErrorMessage(apiError(503,
+      'Kafka is disabled. No OCR job was queued; enable the processing queue and retry.'), 'ocr'))
+      .toMatch(/Kafka is disabled.*No OCR job was queued/);
+    expect(getDocumentErrorMessage(apiError(500), 'extraction'))
+      .toMatch(/extract document data.*Refresh this document's status before retrying/);
   });
 });

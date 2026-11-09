@@ -765,6 +765,73 @@ describe('DocumentManagementPage', () => {
     expect(screen.getAllByText('$125.00').length).toBeGreaterThan(0);
   });
 
+  it('persists rejection status, comment, reviewer, and review timestamp from the API', async () => {
+    const { fetchMock } = setupDocumentRoutes({
+      document: makeDocument({ status: 'PROCESSED' }),
+      ocr: makeOcr(),
+      extraction: makeExtraction(),
+      review: makeReview(),
+    });
+    renderPage('ACCOUNTANT');
+    await screen.findByText('receipt.pdf');
+    await openDocument();
+
+    fireEvent.change(screen.getByLabelText('Review comment'), {
+      target: { value: 'Invoice total needs correction.' },
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'Reject review' }));
+
+    expect(await screen.findByText('Review rejected')).toBeTruthy();
+    expect(await screen.findByText('Review rejected.')).toBeTruthy();
+    expect(screen.getAllByText('Invoice total needs correction.')).toHaveLength(2);
+    expect(screen.getByText(/Ada Lovelace/)).toBeTruthy();
+    const call = fetchMock.mock.calls.find(([input]) =>
+      String(input).endsWith(`/api/v1/documents/${documentId}/review/reject`),
+    );
+    expect(call?.[1]?.method).toBe('POST');
+    expect(JSON.parse(String(call?.[1]?.body))).toEqual({ reviewComment: 'Invoice total needs correction.' });
+  });
+
+  it('keeps approved review data immutable and hides unsupported transitions', async () => {
+    const { fetchMock } = setupDocumentRoutes({
+      document: makeDocument({ status: 'PROCESSED' }),
+      ocr: makeOcr(),
+      extraction: makeExtraction(),
+      review: makeReview({ status: 'APPROVED', reviewedBy: reviewer, reviewedAt: '2026-10-20T12:04:00Z' }),
+    });
+    renderPage('ADMIN');
+    await screen.findByText('receipt.pdf');
+    await openDocument();
+
+    expect(await screen.findByText('Approved review data')).toBeTruthy();
+    expect(screen.getByText(/Ada Lovelace/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Save changes' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Approve review' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reject review' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reopen for review' })).toBeNull();
+    expect(fetchMock.mock.calls.some(([, init]) => ['PUT', 'DELETE'].includes((init?.method ?? 'GET').toUpperCase()))).toBe(false);
+  });
+
+  it('keeps an unknown membership role read-only for review actions', async () => {
+    setupDocumentRoutes({
+      document: makeDocument({ status: 'PROCESSED' }),
+      ocr: makeOcr(),
+      extraction: makeExtraction(),
+      review: makeReview(),
+    });
+    renderPage(null);
+    await screen.findByText('receipt.pdf');
+    await openDocument();
+
+    expect(await screen.findByText('Pending review')).toBeTruthy();
+    expect(screen.getByText('Review data')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Start review' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Save changes' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Approve review' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reject review' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reopen for review' })).toBeNull();
+  });
+
   it('reopens a rejected review for editing', async () => {
     setupDocumentRoutes({
       document: makeDocument({ status: 'PROCESSED' }),

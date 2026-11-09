@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ApiError } from 'src/lib/api/client';
 import { documentApi } from './api';
 import {
   getDocumentErrorMessage,
@@ -46,6 +47,7 @@ export function useDocumentProcessing({
   const [action, setAction] = useState<ProcessingAction | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [pollingPaused, setPollingPaused] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const loadedOnceRef = useRef(false);
   const actionRef = useRef<ProcessingAction | null>(null);
@@ -61,6 +63,7 @@ export function useDocumentProcessing({
     setError(null);
     setOcrQueued(false);
     setExtractionQueued(false);
+    setPollingPaused(false);
     setActionError(null);
     setActionNotice(null);
     setAction(null);
@@ -74,6 +77,7 @@ export function useDocumentProcessing({
     let active = true;
     let timer: number | undefined;
     let attempt = 0;
+    const maxPollAttempts = 24;
 
     const run = async () => {
       if (!loadedOnceRef.current) {
@@ -132,6 +136,10 @@ export function useDocumentProcessing({
           (nextOcr?.status === 'COMPLETED' && nextExtraction === null);
 
         if (needsPolling) {
+          if (attempt >= maxPollAttempts) {
+            setPollingPaused(true);
+            return;
+          }
           const delay = attempt < 4 ? 3000 : attempt < 8 ? 5000 : 10000;
           attempt += 1;
           timer = window.setTimeout(() => {
@@ -189,6 +197,12 @@ export function useDocumentProcessing({
               : 'extraction',
         ),
       );
+      if ((nextAction === 'ocr' || nextAction === 'extraction') &&
+          (requestError instanceof ApiError && (requestError.kind === 'network' || (requestError.status !== null && requestError.status >= 500)))) {
+        // A timed-out/failed response may arrive after the server has accepted the job.
+        // Re-read persisted status before allowing the user to try again.
+        setReloadKey((key) => key + 1);
+      }
       return false;
     } finally {
       actionRef.current = null;
@@ -303,6 +317,7 @@ export function useDocumentProcessing({
     error,
     ocrQueued,
     extractionQueued,
+    pollingPaused,
     action,
     actionError,
     actionNotice,

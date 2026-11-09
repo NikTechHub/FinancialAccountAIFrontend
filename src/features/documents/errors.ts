@@ -57,10 +57,20 @@ export function getDocumentErrorMessage(
       return 'That file type is not supported. Upload a PDF, JPEG, PNG, or WebP document.';
     }
     if (error.status === 503) {
+      const knownQueueErrors = new Set([
+        'Kafka is disabled. No OCR job was queued; enable the processing queue and retry.',
+        'Kafka is disabled. No extraction job was queued; enable the processing queue and retry.',
+        'Could not confirm that the OCR job reached Kafka. Refresh the document status, check Kafka, then retry.',
+        'Could not confirm that the extraction job reached Kafka. Refresh the document status, check Kafka, then retry.',
+      ]);
+      if (knownQueueErrors.has(error.message.trim())) return error.message.trim();
       return 'Document processing is temporarily unavailable. Please try again later.';
     }
     if (error.status !== null && error.status >= 500) {
-      return 'The document request could not be completed. Please try again.';
+      if (action === 'ocr' || action === 'extraction') {
+        return `The server could not complete the request to ${actionText(action)}. Refresh this document's status before retrying.`;
+      }
+      return `The server could not ${actionText(action)}. Refresh the document and retry if the action is still available.`;
     }
     if (error.message.trim()) return error.message;
   }

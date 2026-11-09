@@ -218,9 +218,11 @@ export function DocumentDetailDialog({
                 canWrite={canWrite}
                 ocrQueued={processing.ocrQueued}
                 extractionQueued={processing.extractionQueued}
+                pollingPaused={processing.pollingPaused}
                 action={processing.action}
                 onStartOcr={processing.startOcr}
                 onStartExtraction={processing.startExtraction}
+                onRefresh={processing.reload}
               />
             </section>
 

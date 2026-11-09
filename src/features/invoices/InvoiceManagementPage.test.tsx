@@ -343,6 +343,24 @@ describe('InvoiceManagementPage', () => {
     ).toHaveLength(1);
   });
 
+  it('links an issued invoice to its journal entry workspace', async () => {
+    const journalEntryId = '99999999-0000-0000-0000-000000000001';
+    setupInvoiceRoutes([
+      makeInvoice({ status: 'ISSUED', journalEntryId }),
+    ]);
+    renderPage();
+
+    await screen.findByText('INV-1001');
+    fireEvent.click(screen.getByRole('button', { name: 'View invoice INV-1001' }));
+
+    const link = await screen.findByRole('link', {
+      name: 'View journal entry',
+    });
+    expect(link.getAttribute('href')).toBe(
+      `/journal-entries?entryId=${journalEntryId}`,
+    );
+  });
+
   it('applies one backend filter at a time', async () => {
     const { fetchMock } = setupInvoiceRoutes([makeInvoice()]);
     renderPage();
