@@ -21,12 +21,14 @@ import { reportTotalsBalance } from './amounts';
 interface TrialBalanceTableProps {
   data: TrialBalanceResponse | null;
   isLoading: boolean;
+  currency: string;
   onResetPeriod: () => void;
 }
 
 export function TrialBalanceTable({
   data,
   isLoading,
+  currency,
   onResetPeriod,
 }: TrialBalanceTableProps) {
   const columnCount = 6;
@@ -57,7 +59,7 @@ export function TrialBalanceTable({
               Total debits
             </p>
             <p className="mt-2 break-all text-lg font-semibold tabular-nums">
-              {formatReportAmount(data.totalDebits)}
+              {formatReportAmount(data.totalDebits, currency)}
             </p>
           </div>
           <div className="rounded-lg border border-border p-4 dark:border-white/10">
@@ -65,7 +67,7 @@ export function TrialBalanceTable({
               Total credits
             </p>
             <p className="mt-2 break-all text-lg font-semibold tabular-nums">
-              {formatReportAmount(data.totalCredits)}
+              {formatReportAmount(data.totalCredits, currency)}
             </p>
           </div>
           <div className="rounded-lg border border-border p-4 dark:border-white/10">
@@ -74,7 +76,7 @@ export function TrialBalanceTable({
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <p className="break-all text-lg font-semibold tabular-nums">
-                {formatReportAmount(data.totalDifference)}
+                {formatReportAmount(data.totalDifference, currency)}
               </p>
               {status && <Badge variant={status.variant}>{status.label}</Badge>}
             </div>
@@ -90,13 +92,13 @@ export function TrialBalanceTable({
               <TableHead className="min-w-[220px]">Account</TableHead>
               <TableHead className="min-w-[120px]">Type</TableHead>
               <TableHead className="min-w-[140px] text-right">
-                Debits
+                Debits ({currency})
               </TableHead>
               <TableHead className="min-w-[140px] text-right">
-                Credits
+                Credits ({currency})
               </TableHead>
               <TableHead className="min-w-[150px] text-right">
-                Net balance
+                Net balance ({currency})
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -147,13 +149,13 @@ export function TrialBalanceTable({
                       <Badge variant={type.variant}>{type.label}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
-                      {formatReportAmount(line.debitTotal)}
+                      {formatReportAmount(line.debitTotal, currency)}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
-                      {formatReportAmount(line.creditTotal)}
+                      {formatReportAmount(line.creditTotal, currency)}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
-                      {formatReportAmount(line.netBalance)}
+                      {formatReportAmount(line.netBalance, currency)}
                     </TableCell>
                   </TableRow>
                 );

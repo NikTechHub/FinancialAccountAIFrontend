@@ -8,7 +8,7 @@ import type {
   ProcessingStatus,
 } from './types';
 import { StructuredDataView } from './StructuredDataView';
-import { extractionModelNotice, formatConfidence } from './validation';
+import { extractionModelNotice, formatConfidence, parseStructuredData } from './validation';
 
 interface DocumentProcessingPanelProps {
   document: DocumentRecord;
@@ -18,6 +18,7 @@ interface DocumentProcessingPanelProps {
   ocrQueued: boolean;
   extractionQueued: boolean;
   pollingPaused: boolean;
+  organizationCurrency: string;
   action: string | null;
   onStartOcr: () => Promise<boolean>;
   onStartExtraction: () => Promise<boolean>;
@@ -56,6 +57,7 @@ export function DocumentProcessingPanel({
   ocrQueued,
   extractionQueued,
   pollingPaused,
+  organizationCurrency,
   action,
   onStartOcr,
   onStartExtraction,
@@ -301,6 +303,15 @@ export function DocumentProcessingPanel({
 
             {extraction.status === 'COMPLETED' && (
               <div>
+                {(() => {
+                  const documentCurrency = parseStructuredData(extraction.structuredData)?.currency;
+                  return documentCurrency && documentCurrency.toUpperCase() !== organizationCurrency.toUpperCase() ? (
+                    <Alert variant="lightwarning" className="mb-3">
+                      <AlertTitle>Document currency differs from organization base currency</AlertTitle>
+                      <AlertDescription>{documentCurrency} is preserved from the document; it is not converted to {organizationCurrency}. Verify the currency before approving the review.</AlertDescription>
+                    </Alert>
+                  ) : null;
+                })()}
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <h5 className="text-sm font-semibold">AI extraction suggestion</h5>
                   <Badge variant="lightInfo">Not accounting data</Badge>

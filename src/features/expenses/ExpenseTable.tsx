@@ -19,6 +19,7 @@ import {
   TableRow,
 } from 'src/components/ui/table';
 import type { ExpenseRecord, ExpenseStatus } from './types';
+import { formatMoney } from 'src/features/money/format';
 
 const pageSizeOptions = [10, 20, 50];
 
@@ -56,14 +57,7 @@ function formatDate(value: string) {
 }
 
 function formatAmount(value: number, currency: string) {
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(value);
-  } catch {
-    return `${currency} ${value.toFixed(2)}`;
-  }
+  return formatMoney(value, currency);
 }
 
 export function ExpenseTable({

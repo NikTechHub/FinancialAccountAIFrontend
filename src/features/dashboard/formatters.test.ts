@@ -13,6 +13,7 @@ describe('dashboard formatters', () => {
     expect(formatCurrency(1234.5, 'USD')).toBe('$1,234.50');
     expect(formatCurrency(500, 'INR')).toBe('₹500.00');
     expect(formatCurrency(-250, 'USD')).toBe('-$250.00');
+    expect(formatCurrency(1250000, 'INR')).toBe('₹12,50,000.00');
   });
 
   it('formats compact currency amounts', () => {

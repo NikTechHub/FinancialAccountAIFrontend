@@ -5,20 +5,18 @@
 
 
 
-import Logo from "src/assets/images/logos/dark-logo.svg";
-import Logowhite from "src/assets/images/logos/light-logo.svg";
+import LogoIcon from 'src/assets/images/logos/logo-icon.svg';
+import { BRAND } from 'src/config/branding';
 
 
 const FullLogo = () => {
   return (
-
-
-    <>
-      {/* Dark Logo   */}
-      <img src={Logo} alt="logo" className="block dark:hidden rtl:scale-x-[-1]" />
-      {/* Light Logo  */}
-      <img src={Logowhite} alt="logo" className="hidden dark:block rtl:scale-x-[-1]" />
-    </>
+    <div className="flex h-9 w-[204px] items-center gap-2" aria-label={BRAND.name}>
+      <img src={LogoIcon} alt="" aria-hidden="true" className="h-7 w-7 shrink-0 rtl:scale-x-[-1]" />
+      <span className="truncate text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+        {BRAND.name}
+      </span>
+    </div>
   );
 };
 

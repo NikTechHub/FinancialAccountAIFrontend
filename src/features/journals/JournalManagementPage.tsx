@@ -387,6 +387,7 @@ export function JournalManagementPage({
           ) : (
             <JournalTable
               records={data?.content ?? []}
+          currency={currency}
               isLoading={isLoading}
               canWrite={canWrite}
               isFiltered={isFiltered}

@@ -206,18 +206,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     applyState(unauthenticatedState);
   }, [applyState]);
 
+  const updateOrganization = useCallback((organization: NonNullable<AuthState['organization']>) => {
+    setState((current) => current.status === 'authenticated'
+      ? { ...current, organization }
+      : current);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       status: state.status,
       user: state.user,
       organization: state.organization,
+      updateOrganization,
       role: state.role,
       membershipError: state.membershipError,
       login,
       register,
       logout,
     }),
-    [state, login, register, logout],
+    [state, login, register, logout, updateOrganization],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

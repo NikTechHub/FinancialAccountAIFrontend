@@ -6,12 +6,12 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 import { formatReportAmount } from './display';
 import type { ProfitAndLossLine, ReportAmount } from './types';
 
-export function FinancialReportScope() {
+export function FinancialReportScope({ currency }: { currency: string }) {
   return (
     <p className="text-xs text-muted-foreground">
       This report includes every organization you belong to and cannot be filtered to a single organization.
-      Amounts have no currency labels or conversion. Totals across different currencies do not represent
-      a consolidated balance in a single currency. Inactive accounts with posted activity are included.
+      The backend blocks mixed-currency report requests. Accepted results are shown in {currency}.
+      Inactive accounts with posted activity are included.
     </p>
   );
 }
@@ -44,15 +44,16 @@ export function FinancialReportFeedback({ status, error, title, onRetry }: {
   );
 }
 
-export function FinancialReportTotals({ items }: {
+export function FinancialReportTotals({ items, currency }: {
   items: { label: string; amount: ReportAmount; detail?: ReactNode }[];
+  currency: string;
 }) {
   return (
     <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-3 dark:border-white/10">
       {items.map(({ label, amount, detail }) => (
         <section key={label} aria-label={label} className="min-w-0 rounded-lg border border-border p-4 dark:border-white/10">
           <h6 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</h6>
-          <p className="mt-2 break-all text-lg font-semibold tabular-nums">{formatReportAmount(amount)}</p>
+          <p className="mt-2 break-all text-lg font-semibold tabular-nums">{formatReportAmount(amount, currency)}</p>
           {detail && <div className="mt-2">{detail}</div>}
         </section>
       ))}
@@ -60,11 +61,12 @@ export function FinancialReportTotals({ items }: {
   );
 }
 
-export function FinancialAccountTable({ title, lines, total, amountLabel }: {
+export function FinancialAccountTable({ title, lines, total, amountLabel, currency }: {
   title: string;
   lines: ProfitAndLossLine[];
   total: ReportAmount;
   amountLabel: string;
+  currency: string;
 }) {
   return (
     <section className="min-w-0 border-t border-border dark:border-white/10" aria-label={title}>
@@ -87,13 +89,13 @@ export function FinancialAccountTable({ title, lines, total, amountLabel }: {
             <TableRow key={line.accountId}>
               <TableCell className="font-medium">{line.accountCode}</TableCell>
               <TableCell className="max-w-[400px] whitespace-normal break-words">{line.accountName}</TableCell>
-              <TableCell className="text-right font-medium tabular-nums">{formatReportAmount(line.amount)}</TableCell>
+              <TableCell className="text-right font-medium tabular-nums">{formatReportAmount(line.amount, currency)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
         <TableFooter><TableRow>
           <TableCell colSpan={2}>Total {title.toLowerCase()}</TableCell>
-          <TableCell className="text-right tabular-nums">{formatReportAmount(total)}</TableCell>
+          <TableCell className="text-right tabular-nums">{formatReportAmount(total, currency)}</TableCell>
         </TableRow></TableFooter>
       </Table>
     </section>

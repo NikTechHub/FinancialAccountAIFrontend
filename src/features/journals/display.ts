@@ -1,4 +1,5 @@
 import type { JournalEntryStatus } from './types';
+import { formatMoney } from 'src/features/money/format';
 
 export const journalEntryStatusMeta: Record<
   JournalEntryStatus,
@@ -16,11 +17,8 @@ export const journalEntryStatusOptions = (
   label: journalEntryStatusMeta[value].label,
 }));
 
-export function formatJournalAmount(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  }).format(value);
+export function formatJournalAmount(value: number, currency: string): string {
+  return formatMoney(value, currency, false, 4);
 }
 
 export function formatJournalDate(value: string): string {

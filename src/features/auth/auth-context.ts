@@ -13,6 +13,7 @@ export interface AuthContextValue {
   status: AuthStatus;
   user: UserResponse | null;
   organization: OrganizationResponse | null;
+  updateOrganization?: (organization: OrganizationResponse) => void;
   role: MembershipRole | null;
   membershipError: string | null;
   login: (credentials: LoginRequest) => Promise<void>;

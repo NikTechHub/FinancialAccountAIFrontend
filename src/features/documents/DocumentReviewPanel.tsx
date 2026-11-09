@@ -20,6 +20,7 @@ import { StructuredDataView } from './StructuredDataView';
 interface DocumentReviewPanelProps {
   extraction: DocumentExtraction | null;
   review: DocumentReview | null;
+  organizationCurrency: string;
   canWrite: boolean;
   action: string | null;
   onCreate: () => Promise<boolean>;
@@ -84,6 +85,7 @@ function ReviewField({
 export function DocumentReviewPanel({
   extraction,
   review,
+  organizationCurrency,
   canWrite,
   action,
   onCreate,
@@ -185,6 +187,12 @@ export function DocumentReviewPanel({
 
   return (
     <div className="space-y-5">
+      {values.currency && values.currency.toUpperCase() !== organizationCurrency.toUpperCase() && (
+        <Alert variant="lightwarning">
+          <AlertTitle>Review currency differs from organization base currency</AlertTitle>
+          <AlertDescription>{values.currency} is retained as the document currency. Amounts are not converted to {organizationCurrency}; verify this before approval.</AlertDescription>
+        </Alert>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={statusVariants[review.status]}>
           {statusLabels[review.status]}

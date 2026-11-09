@@ -219,6 +219,7 @@ export function DocumentDetailDialog({
                 ocrQueued={processing.ocrQueued}
                 extractionQueued={processing.extractionQueued}
                 pollingPaused={processing.pollingPaused}
+                organizationCurrency={currency}
                 action={processing.action}
                 onStartOcr={processing.startOcr}
                 onStartExtraction={processing.startExtraction}
@@ -233,6 +234,7 @@ export function DocumentDetailDialog({
               <DocumentReviewPanel
                 extraction={processing.extraction}
                 review={processing.review}
+                organizationCurrency={currency}
                 canWrite={canWrite}
                 action={processing.action}
                 onCreate={processing.createReview}

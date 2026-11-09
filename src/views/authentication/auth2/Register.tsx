@@ -4,6 +4,7 @@ import CardBox from "src/components/shared/CardBox";
 import AuthRegister from "../authforms/AuthRegister";
 
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
+import { BRAND } from 'src/config/branding';
 
 
 
@@ -15,6 +16,10 @@ const Register = () => {
           <CardBox className="md:w-[450px] w-full border-none">
             <div className="mx-auto mb-6">
               <FullLogo />
+            </div>
+            <div className="mb-4 text-center">
+              <p className="text-sm font-semibold text-primary">{BRAND.tagline}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{BRAND.description}</p>
             </div>
             <AuthRegister />
             <div className="flex gap-2 text-base text-ld font-medium mt-6 items-center justify-start">

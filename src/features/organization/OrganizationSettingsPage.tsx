@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { ApiError } from 'src/lib/api/client';
-import type { MembershipResponse, MembershipRole, OrganizationResponse } from 'src/lib/api/types';
+import type { MembershipResponse, MembershipRole, OrganizationResponse, RegionalSettingsResponse } from 'src/lib/api/types';
 import { Alert, AlertDescription, AlertTitle } from 'src/components/ui/alert';
 import { Button } from 'src/components/ui/button';
 import CardBox from 'src/components/shared/CardBox';
@@ -11,6 +11,8 @@ import BreadcrumbComp from 'src/layouts/full/shared/breadcrumb/BreadcrumbComp';
 import { useAuth } from 'src/features/auth/useAuth';
 import { useRole } from 'src/features/auth/useRole';
 import { organizationApi } from './api';
+import { COUNTRY_OPTIONS, CURRENCY_OPTIONS, countryCodeForStoredValue, currencyForCountry } from './regional';
+import { formatMoney } from 'src/features/money/format';
 
 type LoadState = 'loading' | 'success' | 'error';
 const roles: MembershipRole[] = ['OWNER', 'ADMIN', 'ACCOUNTANT', 'EMPLOYEE', 'VIEWER'];
@@ -38,11 +40,15 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export function OrganizationSettingsPage() {
-  const { organization: sessionOrganization } = useAuth();
+  const { organization: sessionOrganization, updateOrganization } = useAuth();
   const { role, membershipError } = useRole();
   const organizationId = sessionOrganization?.id;
   const canAddMembers = role === 'OWNER' || role === 'ADMIN';
+  const canEditSettings = canAddMembers && !membershipError;
   const [organization, setOrganization] = useState<OrganizationResponse | null>(null);
+  const [regionalSettings, setRegionalSettings] = useState<RegionalSettingsResponse | null>(null);
+  const [countrySelection, setCountrySelection] = useState('');
+  const [currencySelection, setCurrencySelection] = useState('');
   const [members, setMembers] = useState<MembershipResponse[]>([]);
   const [loadState, setLoadState] = useState<LoadState>(organizationId ? 'loading' : 'success');
   const [loadMessage, setLoadMessage] = useState<string | null>(null);
@@ -54,6 +60,8 @@ export function OrganizationSettingsPage() {
   const [mutationBusy, setMutationBusy] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [settingsBusy, setSettingsBusy] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
 
   const load = useCallback(async (signal: AbortSignal) => {
     if (!organizationId) {
@@ -63,12 +71,16 @@ export function OrganizationSettingsPage() {
     setLoadState('loading');
     setLoadMessage(null);
     try {
-      const [nextOrganization, nextMembers] = await Promise.all([
+      const [nextOrganization, nextMembers, nextRegionalSettings] = await Promise.all([
         organizationApi.get(organizationId, signal), organizationApi.members(organizationId, signal),
+        organizationApi.regionalSettings(organizationId, signal),
       ]);
       if (signal.aborted) return;
       if (!Array.isArray(nextMembers)) throw new ApiError('Invalid member response', { kind: 'parse' });
       setOrganization(nextOrganization);
+      setRegionalSettings(nextRegionalSettings);
+      setCountrySelection(countryCodeForStoredValue(nextRegionalSettings.country) ?? nextRegionalSettings.country);
+      setCurrencySelection(nextRegionalSettings.currency);
       setMembers(nextMembers);
       setLoadState('success');
     } catch (error) {
@@ -77,6 +89,36 @@ export function OrganizationSettingsPage() {
       setLoadState('error');
     }
   }, [organizationId]);
+
+  async function saveRegionalSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!organizationId || !organization || !regionalSettings || !canEditSettings || settingsBusy) return;
+    setSettingsBusy(true);
+    setSettingsError(null);
+    setNotice(null);
+    try {
+      const saved = await organizationApi.updateRegionalSettings(organizationId, {
+        country: countrySelection,
+        currency: currencySelection,
+      });
+      const updatedOrganization = { ...organization, country: saved.country, currency: saved.currency };
+      setOrganization(updatedOrganization);
+      setRegionalSettings(saved);
+      setCountrySelection(countryCodeForStoredValue(saved.country) ?? saved.country);
+      setCurrencySelection(saved.currency);
+      updateOrganization?.(updatedOrganization);
+      setNotice('Regional settings saved. Financial amounts are displayed in the selected base currency.');
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) setSettingsError('Your session has expired. Sign in again to continue.');
+      else if (error instanceof ApiError && error.status === 403) setSettingsError('Only verified OWNER or ADMIN members can change regional settings.');
+      else if (error instanceof ApiError && error.status === 409) setSettingsError(error.message || 'Base currency cannot be changed because financial records exist.');
+      else if (error instanceof ApiError && error.status === 400) setSettingsError(error.message || 'Choose a supported country and ISO currency.');
+      else if (error instanceof ApiError && error.kind === 'network') setSettingsError('Unable to reach the server. Your settings were not confirmed; retry to check the saved values.');
+      else setSettingsError('Regional settings could not be saved. Please retry.');
+    } finally {
+      setSettingsBusy(false);
+    }
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -135,8 +177,37 @@ export function OrganizationSettingsPage() {
             <Field label="Currency" value={organization.currency} />
             <Field label="Time zone" value={organization.timezone} />
           </dl>
-          <p className="text-xs text-muted-foreground">Organization details are immutable through the available API. Currency is shown as returned by the server.</p>
+          <p className="text-xs text-muted-foreground">Organization identity and time zone remain read-only. Country and base currency can be managed below.</p>
         </CardBox>
+
+        {regionalSettings && <CardBox className="space-y-5 p-5">
+          <div><h2 className="text-lg font-semibold">Regional Settings</h2><p className="text-sm text-muted-foreground">Choose the organization’s country and base currency. Country suggests a currency, which you can change independently.</p></div>
+          {!regionalSettings.currencyChangeAllowed && <Alert variant="lightwarning"><AlertTitle>Base currency is locked</AlertTitle><AlertDescription>This organization has financial records. Historical amounts are not converted; country settings remain editable.</AlertDescription></Alert>}
+          {settingsError && <Alert variant="lighterror"><AlertTitle>Settings could not be saved</AlertTitle><AlertDescription>{settingsError}</AlertDescription></Alert>}
+          <form onSubmit={(event) => void saveRegionalSettings(event)} className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="organization-country">Country</Label>
+              <select id="organization-country" className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={countrySelection} disabled={!canEditSettings || settingsBusy} onChange={(event) => {
+                const nextCountry = event.target.value;
+                setCountrySelection(nextCountry);
+                const suggested = currencyForCountry(nextCountry);
+                if (suggested && regionalSettings.currencyChangeAllowed) setCurrencySelection(suggested);
+              }}>
+                {!COUNTRY_OPTIONS.some((option) => option.code === countrySelection) && countrySelection && <option value={countrySelection}>Stored country: {regionalSettings.country}</option>}
+                {COUNTRY_OPTIONS.map((option) => <option key={option.code} value={option.code}>{option.name} ({option.code})</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="organization-base-currency">Base Currency</Label>
+              <select id="organization-base-currency" className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={currencySelection} disabled={!canEditSettings || settingsBusy || !regionalSettings.currencyChangeAllowed} onChange={(event) => setCurrencySelection(event.target.value)}>
+                {!CURRENCY_OPTIONS.some((option) => option.code === currencySelection) && currencySelection && <option value={currencySelection}>{currencySelection} (stored legacy code)</option>}
+                {CURRENCY_OPTIONS.map((option) => <option key={option.code} value={option.code}>{option.name} ({option.code} · {option.symbol})</option>)}
+              </select>
+            </div>
+            <p className="text-sm text-muted-foreground sm:col-span-2">Preview: <span className="font-semibold text-foreground">{currencySelection ? formatMoney(1250, currencySelection) : 'Choose a supported currency'}</span></p>
+            {canEditSettings ? <Button type="submit" className="sm:col-span-2 sm:justify-self-start" disabled={settingsBusy || !countrySelection || !currencySelection}>{settingsBusy ? 'Saving...' : 'Save Changes'}</Button> : <p className="text-sm text-muted-foreground sm:col-span-2">Only verified OWNER or ADMIN members can change regional settings.</p>}
+          </form>
+        </CardBox>}
 
         <CardBox className="space-y-5 p-5">
           <div><h2 className="text-lg font-semibold">Organization members</h2><p className="text-sm text-muted-foreground">Names, email addresses, roles, and membership creation dates returned by the membership API.</p></div>

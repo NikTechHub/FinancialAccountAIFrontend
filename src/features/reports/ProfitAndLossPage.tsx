@@ -15,6 +15,7 @@ import { useReportRequest } from './useReportRequest';
 
 export function ProfitAndLossPage({ api = reportApi }: { api?: Pick<ReportApi, 'profitAndLoss'> }) {
   const { user, organization } = useAuth();
+  const currency = organization?.currency ?? 'USD';
   const [draft, setDraft] = useState(() => yearToDateRange(new Date(), organization?.timezone));
   const [range, setRange] = useState(draft);
   const [dateError, setDateError] = useState<string | null>(null);
@@ -71,7 +72,7 @@ export function ProfitAndLossPage({ api = reportApi }: { api?: Pick<ReportApi, '
               Revenue is credits minus debits; expenses are debits minus credits.
               These expenses are not limited to records in the Expenses screen.
             </p>
-            <FinancialReportScope />
+            <FinancialReportScope currency={currency} />
           </div>
           <ReportDateRangeForm fromDate={draft.fromDate} toDate={draft.toDate} error={dateError}
             onFromDateChange={(value) => setDraft((current) => ({ ...current, fromDate: value }))}
@@ -87,10 +88,10 @@ export function ProfitAndLossPage({ api = reportApi }: { api?: Pick<ReportApi, '
                   ? <Badge variant={profit < 0n ? 'lightError' : profit > 0n ? 'lightSuccess' : 'gray'}>
                     {profit < 0n ? 'Loss' : profit > 0n ? 'Profit' : 'Break-even'}
                   </Badge> : undefined },
-              ]} />
+              ]} currency={currency} />
               {empty && <p className="px-4 pb-4 text-sm text-muted-foreground">No posted revenue or expense activity in this date range.</p>}
-              <FinancialAccountTable title="Revenue" lines={data.revenueLines} total={data.totalRevenue} amountLabel="Revenue amount" />
-              <FinancialAccountTable title="Expenses" lines={data.expenseLines} total={data.totalExpenses} amountLabel="Expense amount" />
+              <FinancialAccountTable title="Revenue" lines={data.revenueLines} total={data.totalRevenue} amountLabel="Revenue amount" currency={currency} />
+              <FinancialAccountTable title="Expenses" lines={data.expenseLines} total={data.totalExpenses} amountLabel="Expense amount" currency={currency} />
               <p className="border-t border-border p-4 text-xs text-muted-foreground dark:border-white/10">
                 All account lines are shown. Totals and net profit are supplied by the backend for the complete period.
               </p>

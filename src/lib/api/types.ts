@@ -46,6 +46,12 @@ export interface OrganizationResponse {
   updatedAt: string;
 }
 
+export interface RegionalSettingsResponse {
+  country: string;
+  currency: string;
+  currencyChangeAllowed: boolean;
+}
+
 export type MembershipRole = 'OWNER' | 'ADMIN' | 'ACCOUNTANT' | 'EMPLOYEE' | 'VIEWER';
 
 export interface MembershipResponse {

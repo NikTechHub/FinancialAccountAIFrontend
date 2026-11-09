@@ -4,6 +4,7 @@ import CardBox from "src/components/shared/CardBox";
 import AuthLogin from "../authforms/AuthLogin";
 
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
+import { BRAND } from 'src/config/branding';
 
 
 const Login = () => {
@@ -15,9 +16,13 @@ const Login = () => {
             <div className="mx-auto mb-6">
               <FullLogo />
             </div>
+            <div className="mb-4 text-center">
+              <p className="text-sm font-semibold text-primary">{BRAND.tagline}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{BRAND.description}</p>
+            </div>
             <AuthLogin />
             <div className="flex gap-2 text-base text-ld font-medium mt-6 items-center justify-center">
-              <p>New to TailwindAdmin?</p>
+              <p>New to {BRAND.name}?</p>
               <Link
                 to={"/auth/auth2/register"}
                 className="text-primary text-sm font-medium"

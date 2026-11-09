@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router';
 import ProtectedRoute from '../features/auth/ProtectedRoute';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
+import { ASSISTANT_ROUTE_ALLOWLIST } from '../features/assistant/localIntent';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -64,24 +65,24 @@ const Router = [
       </ProtectedRoute>
     ),
     children: [
-      { path: '/', exact: true, element: <Modern /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.dashboard.path, exact: true, element: <Modern /> },
       // { path: '/', exact: true, element: <SamplePage /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
 
-      { path: '/vendors', element: <Vendors /> },
-      { path: '/customers', element: <Customers /> },
-      { path: '/invoices', element: <Invoices /> },
-      { path: '/accounts', element: <Accounts /> },
-      { path: '/expenses', element: <Expenses /> },
-      { path: '/journal-entries', element: <Journals /> },
-      { path: '/reports/general-ledger', element: <GeneralLedger /> },
-      { path: '/reports/trial-balance', element: <TrialBalance /> },
-      { path: '/reports/profit-and-loss', element: <ProfitAndLoss /> },
-      { path: '/reports/balance-sheet', element: <BalanceSheet /> },
-      { path: '/documents', element: <Documents /> },
-      { path: '/ai-assistant', element: <AccountingAssistant /> },
-      { path: '/organization-settings', element: <OrganizationSettings /> },
-      { path: '/audit-logs', element: <AuditLogs /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.vendors.path, element: <Vendors /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.customers.path, element: <Customers /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.invoices.path, element: <Invoices /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.accounts.path, element: <Accounts /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.expenses.path, element: <Expenses /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.journals.path, element: <Journals /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.generalLedger.path, element: <GeneralLedger /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.trialBalance.path, element: <TrialBalance /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.profitAndLoss.path, element: <ProfitAndLoss /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.balanceSheet.path, element: <BalanceSheet /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.documents.path, element: <Documents /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.assistant.path, element: <AccountingAssistant /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.organizationSettings.path, element: <OrganizationSettings /> },
+      { path: ASSISTANT_ROUTE_ALLOWLIST.auditLogs.path, element: <AuditLogs /> },
 
       { path: '/apps/notes', element: <Notes /> },
       { path: '/utilities/form', element: <Form /> },

@@ -14,6 +14,11 @@ describe('report display helpers', () => {
     expect(formatReportAmount(Number.NaN)).toBe('—');
   });
 
+  it('formats exact report amounts with organization currency symbols and grouping', () => {
+    expect(formatReportAmount('1250000.0001', 'INR')).toBe('₹12,50,000.0001');
+    expect(formatReportAmount('-1234.5', 'USD')).toBe('-$1,234.50');
+  });
+
   it('compares decimal zero without floating-point coercion', () => {
     expect(isZeroDecimal(0)).toBe(true);
     expect(isZeroDecimal(-0)).toBe(true);

@@ -49,7 +49,7 @@ const Messages = () => {
                         src={links.avatar}
                         width={45}
                         height={45}
-                        alt="tailwindadmin"
+                        alt={links.title}
                         className="rounded-full"
                       />
                     </span>

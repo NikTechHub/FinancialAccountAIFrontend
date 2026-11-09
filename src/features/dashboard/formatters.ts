@@ -1,4 +1,5 @@
 import { format, isSameDay, isValid, parseISO } from 'date-fns';
+import { formatMoney } from 'src/features/money/format';
 
 const numberFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
@@ -8,42 +9,17 @@ const percentFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
-const currencyFormatters = new Map<string, Intl.NumberFormat>();
-
 function normalizeValue(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Object.is(value, -0) ? 0 : value;
 }
 
-function getCurrencyFormatter(currency: string, compact: boolean): Intl.NumberFormat | null {
-  const code = currency.trim().toUpperCase();
-  if (!/^[A-Z]{3}$/.test(code)) return null;
-
-  const key = `${code}:${compact ? 'compact' : 'full'}`;
-  const cached = currencyFormatters.get(key);
-  if (cached) return cached;
-
-  const formatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: code,
-    ...(compact
-      ? { notation: 'compact', maximumFractionDigits: 1 }
-      : { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-  });
-  currencyFormatters.set(key, formatter);
-  return formatter;
-}
-
 export function formatCurrency(value: number, currency: string): string {
-  const normalized = normalizeValue(value);
-  const formatter = getCurrencyFormatter(currency, false);
-  return formatter ? formatter.format(normalized) : `${currency} ${normalized.toFixed(2)}`;
+  return formatMoney(value, currency);
 }
 
 export function formatCurrencyCompact(value: number, currency: string): string {
-  const normalized = normalizeValue(value);
-  const formatter = getCurrencyFormatter(currency, true);
-  return formatter ? formatter.format(normalized) : `${currency} ${normalized.toFixed(1)}`;
+  return formatMoney(value, currency, true);
 }
 
 export function formatCount(value: number): string {

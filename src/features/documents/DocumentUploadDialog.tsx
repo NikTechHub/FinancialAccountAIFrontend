@@ -23,6 +23,7 @@ import type { ExpenseRecord } from 'src/features/expenses/types';
 import { documentApi } from './api';
 import { getDocumentErrorMessage } from './errors';
 import type { DocumentRecord, DocumentType } from './types';
+import { formatMoney } from 'src/features/money/format';
 import { formatFileSize, validateDocumentFile } from './validation';
 
 interface DocumentUploadDialogProps {
@@ -159,15 +160,7 @@ export function DocumentUploadDialog({
   }
 
   function expenseLabel(expense: ExpenseRecord) {
-    let amount: string;
-    try {
-      amount = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency,
-      }).format(expense.amount);
-    } catch {
-      amount = `${currency} ${expense.amount.toFixed(2)}`;
-    }
+    const amount = formatMoney(expense.amount, currency);
     const label = expense.description || expense.reference || expense.expenseAccountName;
     return `${expense.expenseDate} · ${label} · ${amount}`;
   }

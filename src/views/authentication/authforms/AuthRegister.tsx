@@ -6,6 +6,7 @@ import { Input } from 'src/components/ui/input';
 import { Label } from 'src/components/ui/label';
 import { toFormError } from 'src/features/auth/form-errors';
 import { useAuth } from 'src/features/auth/useAuth';
+import { COUNTRY_OPTIONS, CURRENCY_OPTIONS, currencyForCountry } from 'src/features/organization/regional';
 
 interface RegisterForm {
   firstName: string;
@@ -261,15 +262,24 @@ const AuthRegister = () => {
                 Country
               </Label>
             </div>
-            <Input
+            <select
               id="country"
               name="country"
               value={form.country}
-              onChange={updateField('country')}
-              placeholder="US"
-              variant={fieldErrors.country ? 'failure' : 'default'}
+              onChange={(event) => {
+                const country = event.target.value;
+                setForm((current) => ({
+                  ...current,
+                  country,
+                  currency: currencyForCountry(country) ?? current.currency,
+                }));
+              }}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              aria-invalid={fieldErrors.country ? true : undefined}
               required
-            />
+            >
+              {COUNTRY_OPTIONS.map((option) => <option key={option.code} value={option.code}>{option.name}</option>)}
+            </select>
             {fieldError('country')}
           </div>
           <div className="mb-4">
@@ -278,16 +288,17 @@ const AuthRegister = () => {
                 Currency
               </Label>
             </div>
-            <Input
+            <select
               id="currency"
               name="currency"
               value={form.currency}
-              onChange={updateField('currency')}
-              placeholder="USD"
-              maxLength={3}
-              variant={fieldErrors.currency ? 'failure' : 'default'}
+              onChange={(event) => setForm((current) => ({ ...current, currency: event.target.value }))}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              aria-invalid={fieldErrors.currency ? true : undefined}
               required
-            />
+            >
+              {CURRENCY_OPTIONS.map((option) => <option key={option.code} value={option.code}>{option.name} ({option.code} · {option.symbol})</option>)}
+            </select>
             {fieldError('currency')}
           </div>
           <div className="mb-4">

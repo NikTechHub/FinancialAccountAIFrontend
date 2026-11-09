@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from 'src/components/ui/select';
 import { useAuth } from 'src/features/auth/useAuth';
+import { BRAND } from 'src/config/branding';
 import { formatDateRange } from 'src/features/dashboard/formatters';
 import {
   REPORT_PERIOD_OPTIONS,
@@ -44,6 +45,7 @@ const ProfileWelcome = ({ period, onPeriodChange }: ProfileWelcomeProps) => {
           <p className="break-words text-muted-foreground">
             {organizationName} · {formatDateRange(period.fromDate, period.toDate)}
           </p>
+          <p className="text-xs font-medium text-primary">{BRAND.tagline}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-muted-foreground">Period</span>
             <Select

@@ -97,9 +97,9 @@ export function TrialBalancePage({ api = reportApi }: TrialBalancePageProps) {
             </p>
             <p className="text-xs text-muted-foreground">
               This report includes every organization you belong to. It cannot be
-              filtered to {organization.name}. Amounts are returned without currency
-              labels or conversion; if your organizations use different currencies,
-              these totals are not a consolidated balance in a single currency.
+              filtered to {organization.name}. The backend blocks the report when
+              accessible organizations use mixed currencies; accepted results are
+              shown in {organization.currency ?? 'the organization currency'}.
             </p>
           </div>
 
@@ -141,6 +141,7 @@ export function TrialBalancePage({ api = reportApi }: TrialBalancePageProps) {
             <TrialBalanceTable
               data={status === 'success' ? data : null}
               isLoading={isLoading}
+              currency={organization.currency ?? 'USD'}
               onResetPeriod={resetToYearToDate}
             />
           )}

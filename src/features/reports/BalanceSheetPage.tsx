@@ -15,6 +15,7 @@ import { useReportRequest } from './useReportRequest';
 
 export function BalanceSheetPage({ api = reportApi }: { api?: Pick<ReportApi, 'balanceSheet'> }) {
   const { user, organization } = useAuth();
+  const currency = organization?.currency ?? 'USD';
   const [draftDate, setDraftDate] = useState(() => yearToDateRange(new Date(), organization?.timezone).toDate);
   const [asOfDate, setAsOfDate] = useState(draftDate);
   const [dateError, setDateError] = useState<string | null>(null);
@@ -68,7 +69,7 @@ export function BalanceSheetPage({ api = reportApi }: { api?: Pick<ReportApi, 'b
               Posted journal balances on or before the as-of date. Assets use debits minus credits;
               liabilities and equity use credits minus debits. Draft and void entries are excluded.
             </p>
-            <FinancialReportScope />
+            <FinancialReportScope currency={currency} />
             <Alert variant="lightwarning">
               <AlertTitle>Equity calculation limitation</AlertTitle>
               <AlertDescription>
@@ -86,22 +87,22 @@ export function BalanceSheetPage({ api = reportApi }: { api?: Pick<ReportApi, 'b
                 { label: 'Total assets', amount: data.totalAssets },
                 { label: 'Total liabilities', amount: data.totalLiabilities },
                 { label: 'Total equity', amount: data.totalEquity },
-              ]} />
+              ]} currency={currency} />
               {empty && <p className="px-4 pb-4 text-sm text-muted-foreground">No posted asset, liability or equity activity on or before this date.</p>}
               {reconciliation && (
                 <section aria-label="Accounting equation" className="space-y-2 border-t border-border p-4 dark:border-white/10">
                   <h5 className="text-base font-semibold">Accounting equation</h5>
-                  <p className="break-words text-sm">Assets: {formatReportAmount(data.totalAssets)} · Liabilities + equity: {formatReportAmount(reconciliation.liabilitiesAndEquity)}</p>
-                  <p className="break-words text-sm">Difference (assets − liabilities − equity): <span className="font-semibold tabular-nums">{formatReportAmount(reconciliation.difference)}</span></p>
+                  <p className="break-words text-sm">Assets: {formatReportAmount(data.totalAssets, currency)} · Liabilities + equity: {formatReportAmount(reconciliation.liabilitiesAndEquity, currency)}</p>
+                  <p className="break-words text-sm">Difference (assets − liabilities − equity): <span className="font-semibold tabular-nums">{formatReportAmount(reconciliation.difference, currency)}</span></p>
                   <Badge variant={empty ? 'gray' : reconciliation.balanced ? 'lightSuccess' : 'lightError'}>
                     {empty ? 'No activity' : reconciliation.balanced ? 'Balanced' : 'Discrepancy'}
                   </Badge>
                   <p className="text-xs text-muted-foreground">Reconciliation is calculated exactly from the complete reported totals. Account balances are not adjusted.</p>
                 </section>
               )}
-              <FinancialAccountTable title="Assets" lines={data.assetLines.map((line) => ({ ...line, amount: line.balance }))} total={data.totalAssets} amountLabel="Balance" />
-              <FinancialAccountTable title="Liabilities" lines={data.liabilityLines.map((line) => ({ ...line, amount: line.balance }))} total={data.totalLiabilities} amountLabel="Balance" />
-              <FinancialAccountTable title="Equity" lines={data.equityLines.map((line) => ({ ...line, amount: line.balance }))} total={data.totalEquity} amountLabel="Balance" />
+              <FinancialAccountTable title="Assets" lines={data.assetLines.map((line) => ({ ...line, amount: line.balance }))} total={data.totalAssets} amountLabel="Balance" currency={currency} />
+              <FinancialAccountTable title="Liabilities" lines={data.liabilityLines.map((line) => ({ ...line, amount: line.balance }))} total={data.totalLiabilities} amountLabel="Balance" currency={currency} />
+              <FinancialAccountTable title="Equity" lines={data.equityLines.map((line) => ({ ...line, amount: line.balance }))} total={data.totalEquity} amountLabel="Balance" currency={currency} />
               <p className="border-t border-border p-4 text-xs text-muted-foreground dark:border-white/10">
                 All account lines are shown. Asset, liability and equity totals are supplied by the backend.
                 No current/noncurrent classifications are provided.

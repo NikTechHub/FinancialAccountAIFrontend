@@ -1,5 +1,6 @@
 import type { BadgeProps } from 'src/components/ui/badge';
 import type { InvoiceStatus } from './types';
+import { formatMoney } from 'src/features/money/format';
 
 export const invoiceStatusMeta: Record<
   InvoiceStatus,
@@ -36,14 +37,7 @@ export function formatInvoiceDateTime(value: string) {
 }
 
 export function formatInvoiceAmount(value: number, currency: string) {
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(value);
-  } catch {
-    return `${currency} ${value.toFixed(2)}`;
-  }
+  return formatMoney(value, currency);
 }
 
 export function formatInvoiceNumber(value: number) {

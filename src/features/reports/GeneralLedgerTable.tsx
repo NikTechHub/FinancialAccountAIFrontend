@@ -147,10 +147,10 @@ export function GeneralLedgerTable({
                   {line.lineDescription || '—'}
                 </TableCell>
                 <TableCell className="text-right font-medium tabular-nums">
-                  {formatReportAmount(line.debitAmount)}
+                  {formatReportAmount(line.debitAmount, currency)}
                 </TableCell>
                 <TableCell className="text-right font-medium tabular-nums">
-                  {formatReportAmount(line.creditAmount)}
+                  {formatReportAmount(line.creditAmount, currency)}
                 </TableCell>
               </TableRow>
             ))}

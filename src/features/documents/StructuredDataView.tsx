@@ -8,17 +8,11 @@ import {
 } from 'src/components/ui/table';
 import type { StructuredExtractionData, StructuredLineItem } from './types';
 import { parseStructuredData } from './validation';
+import { formatMoney as formatCurrencyAmount, formatMoneyValue } from 'src/features/money/format';
 
 function formatMoney(value: number | null, currency: string | null) {
   if (value === null) return '—';
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD',
-    }).format(value);
-  } catch {
-    return `${currency ?? ''} ${value.toFixed(2)}`.trim();
-  }
+  return currency ? formatCurrencyAmount(value, currency) : formatMoneyValue(value);
 }
 
 function formatNumber(value: number | null) {

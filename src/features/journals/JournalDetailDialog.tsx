@@ -226,12 +226,12 @@ export function JournalDetailDialog({
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
                           {line.debitAmount > 0
-                            ? formatJournalAmount(line.debitAmount)
+                            ? formatJournalAmount(line.debitAmount, currency)
                             : '—'}
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
                           {line.creditAmount > 0
-                            ? formatJournalAmount(line.creditAmount)
+                            ? formatJournalAmount(line.creditAmount, currency)
                             : '—'}
                         </TableCell>
                       </TableRow>
@@ -247,7 +247,7 @@ export function JournalDetailDialog({
                   Total debits ({currency})
                 </dt>
                 <dd className="font-medium tabular-nums">
-                  {formatJournalAmount(record.totalDebits)}
+                  {formatJournalAmount(record.totalDebits, currency)}
                 </dd>
               </div>
               <div className="flex justify-between gap-4">
@@ -255,7 +255,7 @@ export function JournalDetailDialog({
                   Total credits ({currency})
                 </dt>
                 <dd className="font-medium tabular-nums">
-                  {formatJournalAmount(record.totalCredits)}
+                  {formatJournalAmount(record.totalCredits, currency)}
                 </dd>
               </div>
               <div className="flex justify-between gap-4 border-t border-border pt-2 dark:border-white/10">

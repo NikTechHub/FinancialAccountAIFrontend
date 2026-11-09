@@ -4,10 +4,10 @@ import { Icon } from '@iconify/react';
 import rocket from 'src/assets/images/backgrounds/rocket.png';
 import FullLogo from '../../shared/logo/FullLogo';
 import { Link, useLocation } from 'react-router';
-import { Button } from 'src/components/ui/button';
 import { useTheme } from 'src/components/provider/theme-provider';
 import { AMLogo, AMMenu, AMMenuItem, AMSidebar, AMSubmenu } from 'tailwind-sidebar';
 import 'tailwind-sidebar/styles.css';
+import { BRAND } from 'src/config/branding';
 
 interface SidebarItemType {
   heading?: string
@@ -141,12 +141,8 @@ const SidebarLayout = ({ onClose }: { onClose?: () => void }) => {
           <div className="mt-9 overflow-hidden">
             <div className="flex w-full bg-lightprimary rounded-lg p-6">
               <div className="lg:w-1/2 w-full">
-                <h5 className="text-base text-sidebar-foreground">Haven't Account?</h5>
-                <Button className="whitespace-nowrap mt-2 text-[13px]">
-                  <a href="https://tailwind-admin.com/pricing" target="_blank" rel="noopener noreferrer">
-                    Get Pro
-                  </a>
-                </Button>
+                <h5 className="text-base text-sidebar-foreground">{BRAND.name}</h5>
+                <p className="mt-2 text-xs text-muted-foreground">{BRAND.tagline}</p>
               </div>
               <div className="lg:w-1/2 w-full -mt-4 ml-[26px] scale-[1.2] shrink-0">
                 <img src={rocket} alt="rocket" />

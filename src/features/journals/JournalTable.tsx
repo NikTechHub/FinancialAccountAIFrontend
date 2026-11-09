@@ -29,6 +29,7 @@ const pageSizeOptions = [10, 20, 50];
 
 interface JournalTableProps {
   records: JournalEntryRecord[];
+  currency: string;
   isLoading: boolean;
   canWrite: boolean;
   isFiltered: boolean;
@@ -46,6 +47,7 @@ interface JournalTableProps {
 
 export function JournalTable({
   records,
+  currency,
   isLoading,
   canWrite,
   isFiltered,
@@ -138,10 +140,10 @@ export function JournalTable({
                       {record.description || '—'}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
-                      {formatJournalAmount(record.totalDebits)}
+                      {formatJournalAmount(record.totalDebits, currency)}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
-                      {formatJournalAmount(record.totalCredits)}
+                      {formatJournalAmount(record.totalCredits, currency)}
                     </TableCell>
                     <TableCell>
                       <Badge variant={status.variant}>{status.label}</Badge>

@@ -21,16 +21,24 @@ function authValue(role: AuthContextValue['role'], membershipError: string | nul
     membershipError, login: vi.fn(), register: vi.fn(), logout: vi.fn() };
 }
 
-function renderPage(role: AuthContextValue['role'] = 'OWNER', membershipError: string | null = null) {
-  return render(<MemoryRouter><AuthContext.Provider value={authValue(role, membershipError)}><OrganizationSettingsPage /></AuthContext.Provider></MemoryRouter>);
+function renderPage(role: AuthContextValue['role'] = 'OWNER', membershipError: string | null = null, updateOrganization = vi.fn()) {
+  return render(<MemoryRouter><AuthContext.Provider value={{ ...authValue(role, membershipError), updateOrganization }}><OrganizationSettingsPage /></AuthContext.Provider></MemoryRouter>);
 }
 
-function routes({ addStatus = 201 }: { addStatus?: number } = {}) {
+function routes({ addStatus = 201, currencyChangeAllowed = true }: { addStatus?: number; currencyChangeAllowed?: boolean } = {}) {
   let members: MembershipResponse[] = [existing];
   let addBody: unknown;
+  let settingsBody: unknown;
+  let regional = { country: 'US', currency: 'USD', currencyChangeAllowed };
   let memberGets = 0;
   const fetchMock = createFetchMock([
     { path: `/api/v1/organizations/${orgId}`, handler: () => jsonResponse(testOrganization) },
+    { path: `/api/v1/organizations/${orgId}/regional-settings`, handler: () => jsonResponse(regional) },
+    { method: 'PATCH', path: `/api/v1/organizations/${orgId}/regional-settings`, handler: ({ body }) => {
+      settingsBody = body;
+      regional = { ...(body as { country: string; currency: string }), currencyChangeAllowed };
+      return jsonResponse(regional);
+    } },
     { path: `/api/v1/organizations/${orgId}/members`, handler: () => { memberGets++; return jsonResponse(members); } },
     { method: 'POST', path: `/api/v1/organizations/${orgId}/members`, handler: ({ body }) => {
       addBody = body;
@@ -40,7 +48,7 @@ function routes({ addStatus = 201 }: { addStatus?: number } = {}) {
     } },
   ]);
   vi.stubGlobal('fetch', fetchMock);
-  return { fetchMock, get addBody() { return addBody; }, get memberGets() { return memberGets; } };
+  return { fetchMock, get addBody() { return addBody; }, get settingsBody() { return settingsBody; }, get memberGets() { return memberGets; } };
 }
 
 beforeEach(() => clearSession());
@@ -56,7 +64,8 @@ describe('Organization settings and members', () => {
     expect(screen.getByText(testUser.email)).toBeTruthy();
     expect(within(screen.getByRole('table')).getByText('OWNER')).toBeTruthy();
     expect(screen.getByText(/does not return an account active\/inactive status/)).toBeTruthy();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(screen.getByText(/Preview:/)).toBeTruthy();
   });
 
   it('keeps member controls read-only for a verified non-admin role', async () => {
@@ -96,5 +105,31 @@ describe('Organization settings and members', () => {
     expect(await screen.findByText('This user is already a member of the organization.')).toBeTruthy();
     expect(screen.queryByText('new@example.com')).toBeNull();
     expect(api.memberGets).toBe(1);
+  });
+
+  it('suggests the selected country currency, persists settings, and refreshes auth context', async () => {
+    const api = routes();
+    const updateOrganization = vi.fn();
+    renderPage('OWNER', null, updateOrganization);
+    await screen.findByText(testOrganization.name);
+    fireEvent.change(screen.getByLabelText('Country'), { target: { value: 'IN' } });
+    expect((screen.getByLabelText('Base Currency') as HTMLSelectElement).value).toBe('INR');
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+
+    expect(await screen.findByText(/Regional settings saved/)).toBeTruthy();
+    expect(api.settingsBody).toEqual({ country: 'IN', currency: 'INR' });
+    expect(updateOrganization).toHaveBeenCalledWith(expect.objectContaining({ country: 'IN', currency: 'INR' }));
+  });
+
+  it('keeps country editable while a stored currency is locked', async () => {
+    const api = routes({ currencyChangeAllowed: false });
+    renderPage('ADMIN');
+    await screen.findByText(testOrganization.name);
+    expect((screen.getByLabelText('Base Currency') as HTMLSelectElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText('Country'), { target: { value: 'IN' } });
+    expect((screen.getByLabelText('Base Currency') as HTMLSelectElement).value).toBe('USD');
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+    expect(await screen.findByText(/Regional settings saved/)).toBeTruthy();
+    expect(api.settingsBody).toEqual({ country: 'IN', currency: 'USD' });
   });
 });

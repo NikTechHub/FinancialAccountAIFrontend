@@ -11,6 +11,7 @@ import {
 } from 'src/components/ui/dialog';
 import { getExpenseErrorMessage } from './errors';
 import type { ExpenseAction, ExpenseRecord } from './types';
+import { formatMoney } from 'src/features/money/format';
 
 interface ConfirmExpenseActionDialogProps {
   open: boolean;
@@ -22,14 +23,7 @@ interface ConfirmExpenseActionDialogProps {
 }
 
 function formatAmount(value: number, currency: string) {
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(value);
-  } catch {
-    return `${currency} ${value.toFixed(2)}`;
-  }
+  return formatMoney(value, currency);
 }
 
 export function ConfirmExpenseActionDialog({
